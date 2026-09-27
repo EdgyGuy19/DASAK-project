@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test User Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .navbar {
+            background: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar h1 {
+            color: #333;
+            font-size: 24px;
+        }
+
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .welcome-section h2 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .username-display {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .info-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .user-info {
+            list-style: none;
+        }
+
+        .user-info li {
+            padding: 10px 0;
+            color: #555;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .user-info li:last-child {
+            border-bottom: none;
+        }
+
+        .user-info strong {
+            color: #333;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #888;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Dashboard</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="container">
+        <div class="welcome-section">
+            <h2>Welcome!</h2>
+            <p>Hello, <span class="username-display" id="displayUsername">User</span></p>
+        </div>
+
+        <div class="info-section">
+            <h3>User Information</h3>
+            <ul class="user-info">
+                <li><strong>Status:</strong> Logged In</li>
+                <li><strong>Session Active:</strong> Yes</li>
+                <li><strong>Last Login:</strong> <span id="lastLogin">Just now</span></li>
+            </ul>
+        </div>
+
+        <div class="info-section" style="margin-top: 20px;">
+            <h3>This is the Test User Page</h3>
+            <p style="color: #666; line-height: 1.6;">
+                You have successfully logged in! This is a basic test user page that displays after authentication. 
+                In a real application, this page would connect to your database and display user-specific information.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>© 2024 DASAK Project - SIEM Dashboard</p>
+        </div>
+    </div>
+
+    <script>
+        // Get username from session storage
+        window.addEventListener('load', function() {
+            const username = sessionStorage.getItem('username');
+            if (!username) {
+                // Redirect to login if no username found
+                window.location.href = 'login.html';
+            } else {
+                document.getElementById('displayUsername').textContent = username;
+                document.getElementById('lastLogin').textContent = new Date().toLocaleString();
+            }
+        });
+
+        function logout() {
+            // Clear session storage
+            sessionStorage.removeItem('username');
+            // Redirect to login page
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
