@@ -154,7 +154,7 @@
             const username = sessionStorage.getItem('username');
             if (!username) {
                 // Redirect to login if no username found
-                window.location.href = 'login.html';
+                window.location.href = '/';
             } else {
                 document.getElementById('displayUsername').textContent = username;
                 document.getElementById('lastLogin').textContent = new Date().toLocaleString();
@@ -165,7 +165,7 @@
             // Clear session storage
             sessionStorage.removeItem('username');
             // Redirect to login page
-            window.location.href = 'login.html';
+            window.location.href = '/';
         }
     </script>
 </body>
