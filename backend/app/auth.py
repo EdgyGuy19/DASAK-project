@@ -11,7 +11,6 @@ from .security import hash_password, verify_password, create_access_token, decod
 router = APIRouter(tags=["auth"])
 bearer = HTTPBearer()
 
-
 @router.post("/register", response_model=UserOut, status_code=201)
 def register(data: RegisterRequest, db: Session = Depends(get_db)):
     existing = db.scalar(
@@ -19,7 +18,6 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
     )
     if existing:
         raise HTTPException(status.HTTP_409_CONFLICT, "Username or email already taken")
-
     user = User(
         username=data.username,
         email=data.email,
@@ -30,14 +28,12 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
     db.refresh(user)
     return user
 
-
 @router.post("/login", response_model=TokenOut)
 def login(data: LoginRequest, db: Session = Depends(get_db)):
     user = db.scalar(select(User).where(User.username == data.username))
     if user is None or not verify_password(data.password, user.password_hash):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid credentials")
     return TokenOut(access_token=create_access_token(user.id))
-
 
 def get_current_user(
     creds: HTTPAuthorizationCredentials = Depends(bearer),
@@ -48,7 +44,6 @@ def get_current_user(
     if user is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not authenticated")
     return user
-
 
 @router.get("/me", response_model=UserOut)
 def me(current_user: User = Depends(get_current_user)):
