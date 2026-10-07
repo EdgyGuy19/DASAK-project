@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .navbar {
+            background: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar h1 {
+            color: #333;
+            font-size: 24px;
+        }
+
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .welcome {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome h2 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .welcome p {
+            color: #666;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card h3 {
+            color: #667eea;
+            font-size: 30px;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            color: #666;
+        }
+
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8f9fa;
+            color: #333;
+            text-align: left;
+            padding: 12px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            color: #555;
+        }
+
+        .btn {
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .edit-btn {
+            background: #667eea;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .view-btn {
+            background: #667eea;
+            color: white;
+        }
+
+        .add-btn {
+            background: #27ae60;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .admin-role {
+            color: #764ba2;
+            font-weight: bold;
+        }
+
+        .user-role {
+            color: #555;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 700px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <h1>Admin Dashboard</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="container">
+
+        <div class="welcome">
+            <h2>Welcome, Admin</h2>
+            <p>Manage users, database information and security events.</p>
+        </div>
+
+        <!-- Overview -->
+        <div class="stats">
+
+            <div class="stat-card">
+                <h3>3</h3>
+                <p>Users</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>2</h3>
+                <p>Database Tables</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>12</h3>
+                <p>Security Events</p>
+            </div>
+
+        </div>
+
+
+        <!-- Users -->
+        <div class="section">
+
+            <h2>Users</h2>
+
+            <button class="btn add-btn">Add User</button>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>admin</td>
+                        <td>admin@example.com</td>
+                        <td class="admin-role">Admin</td>
+                        <td>
+                            <button class="btn edit-btn">Edit</button>
+                            <button class="btn delete-btn">Delete</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>testuser</td>
+                        <td>test@example.com</td>
+                        <td class="user-role">User</td>
+                        <td>
+                            <button class="btn edit-btn">Edit</button>
+                            <button class="btn delete-btn">Delete</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>john</td>
+                        <td>john@example.com</td>
+                        <td class="user-role">User</td>
+                        <td>
+                            <button class="btn edit-btn">Edit</button>
+                            <button class="btn delete-btn">Delete</button>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+
+        </div>
+
+
+        <!-- Database -->
+        <div class="section">
+
+            <h2>Database</h2>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Table</th>
+                        <th>Description</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>users</td>
+                        <td>Registered users</td>
+                        <td>
+                            <button class="btn view-btn">View</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>security_events</td>
+                        <td>Security related events</td>
+                        <td>
+                            <button class="btn view-btn">View</button>
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- Security Events -->
+        <div class="section">
+
+            <h2>Recent Security Events</h2>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>User</th>
+                        <th>Event</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>14:32</td>
+                        <td>admin</td>
+                        <td>Login</td>
+                        <td>Success</td>
+                    </tr>
+
+                    <tr>
+                        <td>14:28</td>
+                        <td>john</td>
+                        <td>Login Attempt</td>
+                        <td>Failed</td>
+                    </tr>
+
+                    <tr>
+                        <td>14:20</td>
+                        <td>testuser</td>
+                        <td>Login</td>
+                        <td>Success</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="footer">
+            <p>© 2026 DASAK Project - SIEM Dashboard</p>
+        </div>
+
+    </div>
+
+
+    <script>
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = '/';
+        }
+
+    </script>
+
+</body>
+</html>
