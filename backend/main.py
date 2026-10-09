@@ -12,6 +12,8 @@ app = FastAPI()
 
 app.include_router(auth_router)
 
+
+
 # Check whether the authenticated user is an admin
 def require_admin(current_user: User = Depends(get_current_user)):
     if not current_user.admin:
