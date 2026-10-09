@@ -14,8 +14,8 @@ class UserOut(BaseModel):
     id: int
     username: str
     email: EmailStr
-    admin: bool
-    when_created: datetime
+    is_admin: bool
+    created_at: datetime
     model_config = {"from_attributes": True}
 
 class TokenOut(BaseModel):

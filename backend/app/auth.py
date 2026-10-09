@@ -21,7 +21,7 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
     user = User(
         username=data.username,
         email=data.email,
-        password_hash=hash_password(data.password),
+        password=hash_password(data.password),
     )
     db.add(user)
     db.commit()
@@ -31,7 +31,7 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
 @router.post("/login", response_model=TokenOut)
 def login(data: LoginRequest, db: Session = Depends(get_db)):
     user = db.scalar(select(User).where(User.username == data.username))
-    if user is None or not verify_password(data.password, user.password_hash):
+    if user is None or not verify_password(data.password, user.password):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid credentials")
     return TokenOut(access_token=create_access_token(user.id))
 
