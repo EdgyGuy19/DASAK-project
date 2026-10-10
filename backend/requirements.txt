@@ -5,3 +5,6 @@ pydantic[email]
 pwdlib[argon2]
 pyjwt
 python-dotenv
+streamlit
+pandas
+numpy
