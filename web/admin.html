@@ -186,195 +186,105 @@
 </head>
 
 <body>
-
     <div class="navbar">
         <h1>Admin Dashboard</h1>
         <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
 
-    <div class="container">
-
+    <p id="accessStatus" role="status">Checking admin access…</p>
+    <div class="container" id="adminContent" hidden>
         <div class="welcome">
             <h2>Welcome, Admin</h2>
-            <p>Manage users, database information and security events.</p>
+            <p>View registered users.</p>
         </div>
 
-        <!-- Overview -->
         <div class="stats">
-
             <div class="stat-card">
-                <h3>3</h3>
-                <p>Users</p>
+                <h3 id="userCount">—</h3>
+                <p>Users shown</p>
             </div>
-
-            <div class="stat-card">
-                <h3>2</h3>
-                <p>Database Tables</p>
-            </div>
-
-            <div class="stat-card">
-                <h3>12</h3>
-                <p>Security Events</p>
-            </div>
-
         </div>
 
-
-        <!-- Users -->
         <div class="section">
-
             <h2>Users</h2>
-
-            <button class="btn add-btn">Add User</button>
-
+            <p id="userStatus" role="status">Loading users…</p>
             <table>
                 <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Actions</th>
-                    </tr>
+                    <tr><th>Username</th><th>Email</th><th>Role</th></tr>
                 </thead>
-
-                <tbody>
-
-                    <tr>
-                        <td>admin</td>
-                        <td>admin@example.com</td>
-                        <td class="admin-role">Admin</td>
-                        <td>
-                            <button class="btn edit-btn">Edit</button>
-                            <button class="btn delete-btn">Delete</button>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>testuser</td>
-                        <td>test@example.com</td>
-                        <td class="user-role">User</td>
-                        <td>
-                            <button class="btn edit-btn">Edit</button>
-                            <button class="btn delete-btn">Delete</button>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>john</td>
-                        <td>john@example.com</td>
-                        <td class="user-role">User</td>
-                        <td>
-                            <button class="btn edit-btn">Edit</button>
-                            <button class="btn delete-btn">Delete</button>
-                        </td>
-                    </tr>
-
-                </tbody>
+                <tbody id="userRows"></tbody>
             </table>
-
-        </div>
-
-
-        <!-- Database -->
-        <div class="section">
-
-            <h2>Database</h2>
-
-            <table>
-
-                <thead>
-                    <tr>
-                        <th>Table</th>
-                        <th>Description</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                    <tr>
-                        <td>users</td>
-                        <td>Registered users</td>
-                        <td>
-                            <button class="btn view-btn">View</button>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>security_events</td>
-                        <td>Security related events</td>
-                        <td>
-                            <button class="btn view-btn">View</button>
-                        </td>
-                    </tr>
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-
-        <!-- Security Events -->
-        <div class="section">
-
-            <h2>Recent Security Events</h2>
-
-            <table>
-
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>User</th>
-                        <th>Event</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                    <tr>
-                        <td>14:32</td>
-                        <td>admin</td>
-                        <td>Login</td>
-                        <td>Success</td>
-                    </tr>
-
-                    <tr>
-                        <td>14:28</td>
-                        <td>john</td>
-                        <td>Login Attempt</td>
-                        <td>Failed</td>
-                    </tr>
-
-                    <tr>
-                        <td>14:20</td>
-                        <td>testuser</td>
-                        <td>Login</td>
-                        <td>Success</td>
-                    </tr>
-
-                </tbody>
-
-            </table>
-
         </div>
 
         <div class="footer">
             <p>© 2026 DASAK Project - SIEM Dashboard</p>
         </div>
-
     </div>
 
-
     <script>
-
-        function logout() {
-            sessionStorage.clear();
-            window.location.href = '/';
+        async function getData(path) {
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/';
+                throw new Error('Please log in.');
+            }
+            const response = await fetch(path, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.status === 401) {
+                logout();
+                throw new Error('Please log in again.');
+            }
+            if (response.status === 403) {
+                window.location.href = '/user';
+                throw new Error('Admin access required.');
+            }
+            if (!response.ok) {
+                throw new Error('Could not load data. Please reload to try again.');
+            }
+            return response.json();
         }
 
-    </script>
+        function addRow(tableId, values) {
+            const row = document.createElement('tr');
+            for (const value of values) {
+                const cell = document.createElement('td');
+                // Display database values as text, never as HTML.
+                cell.textContent = value ?? '—';
+                row.appendChild(cell);
+            }
+            document.getElementById(tableId).appendChild(row);
+        }
 
+        async function loadUsers() {
+            const status = document.getElementById('userStatus');
+            try {
+                const users = await getData('/api/admin/users');
+                for (const user of users) {
+                    addRow('userRows', [user.username, user.email, user.is_admin ? 'Admin' : 'User']);
+                }
+                document.getElementById('userCount').textContent = users.length;
+                status.textContent = users.length ? 'Showing up to 100 users.' : 'No users found.';
+            } catch (error) {
+                status.textContent = error.message;
+            }
+        }
+
+        window.addEventListener('load', async function() {
+            try {
+                await getData('/api/admin/check');
+                document.getElementById('accessStatus').hidden = true;
+                document.getElementById('adminContent').hidden = false;
+                await loadUsers();
+            } catch (error) {
+                document.getElementById('accessStatus').textContent = error.message;
+            }
+        });
+
+        function logout() {
+            sessionStorage.removeItem('token');
+            window.location.href = '/';
+        }
+    </script>
 </body>
 </html>

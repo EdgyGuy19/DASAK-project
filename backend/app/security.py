@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 import jwt
 from dotenv import load_dotenv
 from pwdlib import PasswordHash
+from pwdlib.exceptions import UnknownHashError
 
 load_dotenv()
 SECRET_KEY = os.environ["JWT_SECRET"]
@@ -15,7 +16,11 @@ def hash_password(password: str) -> str:
     return password_hash.hash(password)
 
 def verify_password(password: str, hashed: str) -> bool:
-    return password_hash.verify(password, hashed)
+    try:
+        return password_hash.verify(password, hashed)
+    except UnknownHashError:
+        # Older demo accounts do not contain supported password hashes.
+        return False
 
 def create_access_token(user_id: int) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=TOKEN_MINUTES)
