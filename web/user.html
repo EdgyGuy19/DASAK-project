@@ -124,6 +124,7 @@
         <div class="welcome-section">
             <h2>Welcome!</h2>
             <p>Hello, <span class="username-display" id="displayUsername">User</span></p>
+            <p><a id="adminLink" href="/admin" hidden>Open admin dashboard</a></p>
         </div>
 
         <div class="info-section">
@@ -149,24 +150,44 @@
     </div>
 
     <script>
-        // Get username from session storage
-        window.addEventListener('load', function() {
-            const username = sessionStorage.getItem('username');
-            if (!username) {
-                // Redirect to login if no username found
-                window.location.href = '/';
-            } else {
-                document.getElementById('displayUsername').textContent = username;
-                document.getElementById('lastLogin').textContent = new Date().toLocaleString();
-            }
-        });
+    // Check login state with the backend using the stored token
+    window.addEventListener('load', async function() {
+        const token = sessionStorage.getItem('token');
+        if (!token) {
+            // Redirect to login if no token found
+            window.location.href = '/';
+            return;
+        }
 
-        function logout() {
-            // Clear session storage
-            sessionStorage.removeItem('username');
-            // Redirect to login page
+        try {
+            // Ask the backend who the token belongs to
+            const res = await fetch('/me', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!res.ok) {
+                // Token invalid or expired: clear it and redirect to login
+                sessionStorage.removeItem('token');
+                window.location.href = '/';
+                return;
+            }
+
+            const user = await res.json();
+            document.getElementById('displayUsername').textContent = user.username;
+            document.getElementById('adminLink').hidden = !user.is_admin;
+            document.getElementById('lastLogin').textContent = new Date().toLocaleString();
+        } catch (err) {
+            // Server unreachable: redirect to login
             window.location.href = '/';
         }
+    });
+
+    function logout() {
+        // Clear session storage
+        sessionStorage.removeItem('token');
+        // Redirect to login page
+        window.location.href = '/';
+    }
     </script>
 </body>
 </html>
