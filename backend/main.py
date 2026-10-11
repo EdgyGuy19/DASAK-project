@@ -6,9 +6,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.auth import router as auth_router, get_current_user
-from app.models import User
+from app.models import Event, User
 from app.database import get_db, init_db
-from app.schemas import UserOut
+from app.schemas import UserOut, EventOut
 
 from pathlib import Path
 
@@ -23,8 +23,6 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(auth_router)
-
-
 
 # Check whether the authenticated user is an admin
 def require_admin(current_user: User = Depends(get_current_user)):
@@ -67,3 +65,12 @@ def list_users(
     db: Session = Depends(get_db),
 ):
     return db.scalars(select(User).order_by(User.id).offset(offset).limit(limit)).all()
+
+@app.get("/api/admin/events", response_model=list[EventOut])
+def list_events(
+    limit: int = Query(default=100, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    admin: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    return db.scalars(select(Event).order_by(Event.id).offset(offset).limit(limit)).all()
