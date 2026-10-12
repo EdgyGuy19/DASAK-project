@@ -9,6 +9,7 @@ from app.auth import router as auth_router, get_current_user
 from app.models import Event, User
 from app.database import get_db, init_db
 from app.schemas import UserOut, EventOut
+from app.stats import router as stats_router
 
 from pathlib import Path
 
@@ -33,6 +34,9 @@ def require_admin(current_user: User = Depends(get_current_user)):
         )
 
     return current_user
+
+
+app.include_router(stats_router, dependencies=[Depends(require_admin)])
 
 
 @app.get("/")
