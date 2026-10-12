@@ -9,6 +9,7 @@ EVENT_TYPES = frozenset({
     "registration",
     "login",
     "logout",
+    "access",
     "login_fail",
     "registration_fail",
     "unauthorized_access",

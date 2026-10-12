@@ -107,25 +107,42 @@
             <button type="submit">Login</button>
             <div class="error-message" id="errorMessage">Invalid credentials</div>
         </form>
+        <p style="text-align:center; margin-top:15px;">
+            No account? <a href="/register">Register</a>
+        </p>
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
 
-            // Simple validation - in real app would validate against database
-            if (username && password) {
-                // Store username in session storage
-                sessionStorage.setItem('username', username);
-                // Redirect to user page
-                window.location.href = '/user';
-            } else {
-                document.getElementById('errorMessage').style.display = 'block';
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorEl = document.getElementById('errorMessage');
+        errorEl.style.display = 'none';
+
+        try {
+            const res = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (!res.ok) {
+                errorEl.textContent = 'Invalid credentials';
+                errorEl.style.display = 'block';
+                return;
             }
-        });
+
+            const data = await res.json();
+            sessionStorage.setItem('token', data.access_token);
+            window.location.href = '/user';
+        } catch (err) {
+            errorEl.textContent = 'Could not reach the server';
+            errorEl.style.display = 'block';
+        }
+    });
     </script>
 </body>
 </html>

@@ -1,15 +1,21 @@
+from pathlib import Path
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-import models.user
 
-engine = create_engine("sqlite:///./app.db")
-models.user.Base.metadata.create_all(engine)
+from .models import Base
+
+
+DATABASE_FILE = Path(__file__).resolve().parents[2] / "dasak.db"
+engine = create_engine(
+    f"sqlite:///{DATABASE_FILE}", connect_args={"check_same_thread": False}
+)
+
+def init_db():
+    # Creates missing tables; it does not replace existing tables or records.
+    Base.metadata.create_all(engine)
 
 def get_db():
-    db = Session(autocommit=False, autoflush=False, bind=engine)
-    try:
+    with Session(engine) as db:
         yield db
-    finally:
-        db.close()
-
 
