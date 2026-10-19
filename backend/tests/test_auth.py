@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
-from app import database
+from app import database, eventsLogger
 from app.models import User
 from app.security import verify_password
 from main import app
@@ -27,6 +27,8 @@ class AuthTests(unittest.TestCase):
         )
         self.engine_patch = patch.object(database, "engine", self.engine)
         self.engine_patch.start()
+        self.logger_patch = patch.object(eventsLogger, "DATABASE_FILE", Path(self.temp.name) / "test.db")
+        self.logger_patch.start()
         self.client = TestClient(app)
         self.client.__enter__()
         self.account = {
@@ -38,6 +40,7 @@ class AuthTests(unittest.TestCase):
     def tearDown(self):
         self.client.__exit__(None, None, None)
         self.engine_patch.stop()
+        self.logger_patch.stop()
         self.engine.dispose()
         self.temp.cleanup()
 

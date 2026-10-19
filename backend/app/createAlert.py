@@ -17,7 +17,7 @@ def log_alert(
     data = {
         "alert_id": str(uuid4()),
         "username": username,
-        "timestamp": datetime.now(timezone.utc),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "rule": rule,
         "ip_src": ip_src,
         "event_count": event_count,
@@ -28,7 +28,7 @@ def log_alert(
         with connection:
             connection.execute("""
                 INSERT INTO alerts (
-                    alert_id, username, timestamp, rule, ip_src, event_count, status, message
+                    id, username, timestamp, rule, ip_src, event_count, status, message
                 ) VALUES (
                     :alert_id, :username, :timestamp, :rule, :ip_src, :event_count, :status, :message
                 )
