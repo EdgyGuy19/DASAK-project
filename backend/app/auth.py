@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy import select, or_
 from sqlalchemy.orm import Session
@@ -14,7 +14,7 @@ router = APIRouter(tags=["auth"])
 bearer = HTTPBearer()
 
 @router.post("/register", response_model=UserOut, status_code=201)
-def register(data: RegisterRequest, db: Session = Depends(get_db)):
+def register(data: RegisterRequest, request: Request, db: Session = Depends(get_db)):
     existing = db.scalar(
         select(User).where(or_(User.username == data.username, User.email == data.email))
     )
@@ -26,7 +26,7 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
                 user_id=existing.id,
                 username=existing.username,
                 http_request=f"POST /register",
-                ip_src="67.67.67.67", # Kan fixa om det behövs
+                ip_src=request.client.host if request.client else None,
             )
         raise HTTPException(status.HTTP_409_CONFLICT, "Username or email already taken")
     user = User(
@@ -45,22 +45,22 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
         user_id=user.id,
         username=user.username,
         http_request=f"POST /register",
-        ip_src="67.67.67.67", # Kan fixa om det behövs
+        ip_src=request.client.host if request.client else None,
     )
     return user
 
 @router.post("/login", response_model=TokenOut)
-def login(data: LoginRequest, db: Session = Depends(get_db)):
+def login(data: LoginRequest, request: Request, db: Session = Depends(get_db)):
     user = db.scalar(select(User).where(User.username == data.username))
     if user is None or not verify_password(data.password, user.password):
         log_event(
-                event_type="login",
+                event_type="login_failed",
                 status_code=401,
                 message="Invalid credentials",
-                user_id=user.id,
-                username=user.username,
+                user_id=user.id if user else None,
+                username=data.username,
                 http_request=f"POST /login",
-                ip_src="67.67.67.67", # Kan fixa om det behövs
+                ip_src=request.client.host if request.client else None,
             )
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid credentials")
     log_event(
@@ -70,11 +70,12 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
                     user_id=user.id,
                     username=user.username,
                     http_request=f"POST /login",
-                    ip_src="67.67.67.67", # Kan fixa om det behövs
+                    ip_src=request.client.host if request.client else None,
                 )
     return TokenOut(access_token=create_access_token(user.id))
 
 def get_current_user(
+    request: Request,
     creds: HTTPAuthorizationCredentials = Depends(bearer),
     db: Session = Depends(get_db),
 ) -> User:
@@ -87,14 +88,14 @@ def get_current_user(
             message="Unauthorized access attempt",
             user_id=user_id,
             username=None,
-            http_request=f"GET /me",
-            ip_src="67.67.67.67", # Kan fixa om det behövs
+            http_request=f"{request.method} {request.url.path}",
+            ip_src=request.client.host if request.client else None,
         )
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not authenticated")
     return user
 
 @router.get("/me", response_model=UserOut)
-def me(current_user: User = Depends(get_current_user)):
+def me(request: Request, current_user: User = Depends(get_current_user)):
     log_event(
         event_type="access",
         status_code=200,
@@ -102,6 +103,6 @@ def me(current_user: User = Depends(get_current_user)):
         user_id=current_user.id,
         username=current_user.username,
         http_request=f"GET /me",
-        ip_src="67.67.67.67", # Kan fixa om det behövs
+        ip_src=request.client.host if request.client else None,
     )
     return current_user

@@ -11,9 +11,11 @@ EVENT_TYPES = frozenset({
     "logout",
     "access",
     "login_fail",
+    "login_failed",
     "registration_fail",
     "unauthorized_access",
     "forbidden_access",
+    "sql_injection",
 })
 
 DATABASE_FILE = Path(__file__).resolve().parents[2] / "dasak.db"

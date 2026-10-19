@@ -10,6 +10,8 @@ from app.models import Event, User
 from app.database import get_db, init_db
 from app.schemas import UserOut, EventOut
 from app.stats import router as stats_router
+from app.siem import router as siem_router
+from app.detection.request_logging import log_sql_injection_request
 
 from pathlib import Path
 
@@ -22,6 +24,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+app.middleware("http")(log_sql_injection_request)
 
 app.include_router(auth_router)
 
@@ -37,6 +40,7 @@ def require_admin(current_user: User = Depends(get_current_user)):
 
 
 app.include_router(stats_router, dependencies=[Depends(require_admin)])
+app.include_router(siem_router, dependencies=[Depends(require_admin)])
 
 
 @app.get("/")
@@ -77,4 +81,4 @@ def list_events(
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ):
-    return db.scalars(select(Event).order_by(Event.id).offset(offset).limit(limit)).all()
+    return db.scalars(select(Event).order_by(Event.event_id).offset(offset).limit(limit)).all()
