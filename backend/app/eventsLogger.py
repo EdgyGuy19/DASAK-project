@@ -16,6 +16,7 @@ EVENT_TYPES = frozenset({
     "unauthorized_access",
     "forbidden_access",
     "sql_injection",
+    "http_request"
 })
 
 DATABASE_FILE = Path(__file__).resolve().parents[2] / "dasak.db"
