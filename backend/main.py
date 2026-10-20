@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Depends, HTTPException, Query, status
@@ -7,26 +8,39 @@ from sqlalchemy.orm import Session
 
 from app.auth import router as auth_router, get_current_user
 from app.models import Event, User
-from app.database import get_db, init_db
+from app.database import get_db, init_db, engine
 from app.schemas import UserOut, EventOut
 from app.stats import router as stats_router
 from app.siem import router as siem_router
 from app.detection.request_logging import log_sql_injection_request
-from app.detection.dos_detection import log_dos_request
+from app.detection.brute_force import run_all, persist_alerts
 
 from pathlib import Path
 
 WEB_DIR = Path(__file__).resolve().parents[1] / "web"
+DETECTION_INTERVAL_SECONDS = 60
+
+
+async def run_detection_loop():
+    while True:
+        try:
+            with Session(engine) as db:
+                findings = run_all(db)
+                persist_alerts(db, findings)
+        except Exception as e:
+            print(f"Detection loop error: {e}")
+        await asyncio.sleep(DETECTION_INTERVAL_SECONDS)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    task = asyncio.create_task(run_detection_loop())
     yield
-
+    task.cancel()
 
 app = FastAPI(lifespan=lifespan)
 app.middleware("http")(log_sql_injection_request)
-app.middleware("http")(log_dos_request)
 
 app.include_router(auth_router)
 
@@ -37,7 +51,6 @@ def require_admin(current_user: User = Depends(get_current_user)):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin access required"
         )
-
     return current_user
 
 
