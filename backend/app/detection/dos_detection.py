@@ -27,7 +27,7 @@ def check_dos_attack():
     filtered_events = event_filter(events)
 
     for ip_src, ip_events in filtered_events.items():
-        if len(ip_events) < 10:
+        if len(ip_events) < 30:
             continue
 
         matching_alerts = []
