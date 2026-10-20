@@ -1,12 +1,11 @@
-import sys
 import time
 import requests
 
 TARGET = "http://127.0.0.1:8000"
 assert TARGET.startswith("http://127.0.0.1"), "Only run against localhost"
 
-def run_dos_attack(username = "user1234", email = "user@gmail.com", password = "user1234", attempts = 50, delay = 0.2):
-    print(f"Starting simulated DOS attack against ")
+def run_dos_attack(username = "user1234", email = "user@gmail.com", password = "user1234", attempts = 150, delay = 0.05):
+    print(f"Starting simulated DOS attack against {TARGET}: {attempts} requests")
     start_time = time.time()
     for i in range(attempts):
         res = requests.post(
