@@ -11,7 +11,7 @@ from app.database import get_db, init_db
 from app.schemas import UserOut, EventOut
 from app.stats import router as stats_router
 from app.siem import router as siem_router
-from app.detection.request_logging import log_sql_injection_request, log_xss_request
+from app.detection.request_logging import log_sql_injection_request, log_xss_attempt_request
 
 
 from pathlib import Path
@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.middleware("http")(log_sql_injection_request)
-app.middleware("http")(log_xss_request)  
+app.middleware("http")(log_xss_attempt_request)  
 
 app.include_router(auth_router)
 
