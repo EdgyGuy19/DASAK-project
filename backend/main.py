@@ -14,6 +14,7 @@ from app.stats import router as stats_router
 from app.siem import router as siem_router
 from app.detection.request_logging import log_sql_injection_request
 from app.detection.brute_force import run_all, persist_alerts
+from app.detection.dos_detection import log_dos_request, run_dos_detection
 
 from pathlib import Path
 
@@ -35,14 +36,28 @@ async def run_detection_loop():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
-    task = asyncio.create_task(run_detection_loop())
-    yield
-    task.cancel()
+    brute_force_task = asyncio.create_task(run_detection_loop())
+    dos_task = asyncio.create_task(run_dos_detection())
+    try:
+        yield
+    finally:
+        brute_force_task.cancel()
+        dos_task.cancel()
+        try:
+            await brute_force_task
+        except asyncio.CancelledError:
+            pass
+        try:
+            await dos_task
+        except asyncio.CancelledError:
+            pass
+
 
 app = FastAPI(lifespan=lifespan)
 app.middleware("http")(log_sql_injection_request)
 
 app.include_router(auth_router)
+
 
 # Check whether the authenticated user is an admin
 def require_admin(current_user: User = Depends(get_current_user)):
@@ -62,13 +77,16 @@ app.include_router(siem_router, dependencies=[Depends(require_admin)])
 def login_page():
     return FileResponse(WEB_DIR / "login.html")
 
+
 @app.get("/register")
 def register_page():
     return FileResponse(WEB_DIR / "register.html")
 
+
 @app.get("/user")
 def user_page():
     return FileResponse(WEB_DIR / "user.html")
+
 
 @app.get("/admin")
 def admin_page():
@@ -88,6 +106,7 @@ def list_users(
     db: Session = Depends(get_db),
 ):
     return db.scalars(select(User).order_by(User.id).offset(offset).limit(limit)).all()
+
 
 @app.get("/api/admin/events", response_model=list[EventOut])
 def list_events(
