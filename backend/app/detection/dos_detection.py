@@ -20,7 +20,9 @@ def check_dos_attack():
         connection,
     ):
         quory_event = connection.execute(f"""
-            SELECT * FROM events
+            SELECT event_id, timestamp, event_type, user_id, username,
+                   ip_src, http_request, status_code, message
+            FROM events
             WHERE event_type = 'http_request'
               AND julianday(timestamp)
                   BETWEEN julianday('now', '-{WINDOW_SECONDS} seconds')
