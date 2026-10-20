@@ -1,129 +1,322 @@
-from backend/app/stats.py import
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Login Page</title>
+    <title>SIEM Dashboard</title>
     <style>
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
 
         body {
+            margin: 0;
+            padding: 24px;
             font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
         }
 
-        .login-container {
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header,
+        .card,
+        .panel {
             background: white;
-            padding: 40px;
             border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+        }
+
+        h1,
+        h2 {
+            margin: 0;
         }
 
         h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-            font-size: 28px;
+            font-size: 26px;
         }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: bold;
-        }
-
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-
-        input[type="text"]:focus,
-        input[type="password"]:focus {
-            outline: none;
-            border-color: #667eea;
+        h2 {
+            margin-bottom: 16px;
+            font-size: 20px;
         }
 
         button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
+            padding: 10px 16px;
+            border: 0;
             border-radius: 5px;
-            font-size: 16px;
+            background: #667eea;
+            color: white;
             font-weight: bold;
             cursor: pointer;
-            transition: transform 0.2s;
         }
 
         button:hover {
-            transform: translateY(-2px);
+            background: #5568d8;
         }
 
-        button:active {
-            transform: translateY(0);
+        .counters {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
         }
 
-        .error-message {
-            color: #e74c3c;
+        .card {
+            padding: 24px;
             text-align: center;
-            margin-top: 15px;
-            display: none;
+        }
+
+        .counter {
+            display: block;
+            margin-bottom: 8px;
+            color: #667eea;
+            font-size: 36px;
+        }
+
+        .panel {
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .status {
+            color: #666;
+        }
+
+        .error {
+            color: #c0392b;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f8f9fa;
+        }
+
+        @media (max-width: 700px) {
+            .header {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .counters {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="Dashboard">
-        <h1>Test Dashboard</h1>
-        
-        <div class="row">
-  <div class="column">
-    <div class="card">
-      <p><i class="fa fa-user"></i></p>
-      <h3>55</h3>
-      <p>Events</p>
-    </div>
-  </div>
+    <main class="dashboard">
+        <header class="header">
+            <h1>SIEM Dashboard</h1>
+            <button type="button" id="refreshButton">Refresh</button>
+        </header>
 
-  <div class="column">
-    <div class="card">
-      <p><i class="fa fa-check"></i></p>
-      <h3>11</h3>
-      <p>Alerts</p>
-    </div>
-  </div>
-</div>
-  
-<div class="column"></div>
-    <ol>
-    <li>Head north on N Halsted St</li>
-    <li>Turn right on W Diversey Pkwy</li>
-    <li>Turn left on N Orchard St</li>
-    </ol>
-        </div>
-</div>
-  
+        <p id="pageStatus" class="status" role="status">Checking admin access…</p>
+
+        <section id="dashboardContent" hidden>
+            <div class="counters">
+                <div class="card">
+                    <strong id="totalEvents" class="counter">—</strong>
+                    <span>Total events</span>
+                </div>
+                <div class="card">
+                    <strong id="totalAlerts" class="counter">—</strong>
+                    <span>Total alerts</span>
+                </div>
+            </div>
+
+            <section class="panel">
+                <h2>Alerts</h2>
+                <p id="alertsStatus" class="status" role="status">Loading alerts…</p>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Rule</th>
+                                <th>Username</th>
+                                <th>Source IP</th>
+                                <th>Events</th>
+                                <th>Status</th>
+                                <th>Message</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alertsRows"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2>Events</h2>
+                <p id="eventsStatus" class="status" role="status">Loading events…</p>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Type</th>
+                                <th>Username</th>
+                                <th>Source IP</th>
+                                <th>Status code</th>
+                                <th>Request</th>
+                                <th>Message</th>
+                            </tr>
+                        </thead>
+                        <tbody id="eventsRows"></tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <script>
+        async function getData(path) {
+            const token = sessionStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/';
+                throw new Error('Please log in.');
+            }
+
+            const response = await fetch(path, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.status === 401) {
+                logout();
+                throw new Error('Please log in again.');
+            }
+            if (response.status === 403) {
+                window.location.href = '/user';
+                throw new Error('Admin access required.');
+            }
+            if (!response.ok) {
+                throw new Error('Could not load dashboard data.');
+            }
+            return response.json();
+        }
+
+        function addRow(tableId, values) {
+            const row = document.createElement('tr');
+            for (const value of values) {
+                const cell = document.createElement('td');
+                cell.textContent = value ?? '—';
+                row.appendChild(cell);
+            }
+            document.getElementById(tableId).appendChild(row);
+        }
+
+        async function loadStats() {
+            const stats = await getData('/api/stats');
+            document.getElementById('totalEvents').textContent = stats.total_events ?? 0;
+            document.getElementById('totalAlerts').textContent = stats.total_alerts ?? 0;
+        }
+
+        async function loadAlerts() {
+            const status = document.getElementById('alertsStatus');
+            const rows = document.getElementById('alertsRows');
+            rows.replaceChildren();
+
+            try {
+                const alerts = await getData('/api/siem/alerts?limit=100&offset=0');
+                for (const alert of alerts) {
+                    addRow('alertsRows', [
+                        alert.timestamp,
+                        alert.rule,
+                        alert.username,
+                        alert.ip_src,
+                        alert.event_count,
+                        alert.status ? 'Active' : 'Handled',
+                        alert.message
+                    ]);
+                }
+                status.textContent = alerts.length
+                    ? `Showing ${alerts.length} latest alerts.`
+                    : 'No alerts found.';
+            } catch (error) {
+                status.textContent = error.message;
+                status.className = 'status error';
+            }
+        }
+
+        async function loadEvents() {
+            const status = document.getElementById('eventsStatus');
+            const rows = document.getElementById('eventsRows');
+            rows.replaceChildren();
+
+            try {
+                const events = await getData('/api/siem/events?limit=100&offset=0');
+                for (const event of events) {
+                    addRow('eventsRows', [
+                        event.timestamp,
+                        event.event_type,
+                        event.username,
+                        event.ip_src,
+                        event.status_code,
+                        event.http_request,
+                        event.message
+                    ]);
+                }
+                status.textContent = events.length
+                    ? `Showing ${events.length} latest events.`
+                    : 'No events found.';
+            } catch (error) {
+                status.textContent = error.message;
+                status.className = 'status error';
+            }
+        }
+
+        async function loadDashboard() {
+            const pageStatus = document.getElementById('pageStatus');
+            try {
+                await getData('/api/admin/check');
+                document.getElementById('dashboardContent').hidden = false;
+                pageStatus.hidden = true;
+                await Promise.all([
+                    loadStats(),
+                    loadAlerts(),
+                    loadEvents()
+                ]);
+            } catch (error) {
+                pageStatus.textContent = error.message;
+                pageStatus.className = 'status error';
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('token');
+            window.location.href = '/';
+        }
+
+        document.getElementById('refreshButton').addEventListener('click', loadDashboard);
+        window.addEventListener('load', loadDashboard);
+    </script>
 </body>
 </html>
