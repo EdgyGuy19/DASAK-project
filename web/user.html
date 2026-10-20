@@ -5,112 +5,151 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test User Page</title>
     <style>
+        :root {
+            color-scheme: dark;
+        }
+
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
 
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 24px;
             min-height: 100vh;
-            padding: 20px;
+            font-family: Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.5;
+            color: #e6edf3;
+            background: #11151b;
+        }
+
+        h1, h2, h3, p {
+            margin: 0;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        h2 {
+            margin-bottom: 8px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        h3 {
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        a {
+            color: #9cc9ff;
+            text-underline-offset: 3px;
+        }
+
+        button {
+            padding: 8px 14px;
+            border: 1px solid #5f6d80;
+            border-radius: 4px;
+            background: #1b222c;
+            color: inherit;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #283341;
+        }
+
+        button:focus-visible,
+        a:focus-visible {
+            outline: 2px solid #9cc9ff;
+            outline-offset: 3px;
         }
 
         .navbar {
-            background: white;
-            padding: 15px 30px;
-            border-radius: 10px;
+            max-width: 960px;
+            margin: 0 auto 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #343f4d;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .navbar h1 {
-            color: #333;
-            font-size: 24px;
-        }
-
-        .logout-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s;
-        }
-
-        .logout-btn:hover {
-            background: #c0392b;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .container {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            max-width: 600px;
+            max-width: 960px;
             margin: 0 auto;
         }
 
-        .welcome-section {
+        .footer {
+            margin-top: 24px;
+            color: #adb9c7;
             text-align: center;
-            margin-bottom: 30px;
+            font-size: 13px;
         }
 
-        .welcome-section h2 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
+        @media (max-width: 600px) {
+            body {
+                padding: 16px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+        }
+
+        .navbar,
+        .container {
+            max-width: 720px;
+        }
+
+        .container {
+            padding: 24px;
+            background: #1b222c;
+            border: 1px solid #343f4d;
+            border-radius: 6px;
+        }
+
+        .welcome-section {
+            margin-bottom: 24px;
+        }
+
+        .welcome-section p + p {
+            margin-top: 8px;
         }
 
         .username-display {
-            color: #667eea;
-            font-weight: bold;
-            font-size: 20px;
+            font-weight: 600;
         }
 
         .info-section {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
             margin-top: 20px;
-            border-left: 4px solid #667eea;
-        }
-
-        .info-section h3 {
-            color: #333;
-            margin-bottom: 15px;
+            padding-top: 20px;
+            border-top: 1px solid #343f4d;
         }
 
         .user-info {
+            margin: 0;
+            padding: 0;
             list-style: none;
         }
 
         .user-info li {
-            padding: 10px 0;
-            color: #555;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .user-info li:last-child {
-            border-bottom: none;
+            padding: 8px 0;
         }
 
         .user-info strong {
-            color: #333;
+            font-weight: 600;
         }
 
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            color: #888;
-            font-size: 14px;
+        .info-section p {
+            color: #adb9c7 !important;
         }
     </style>
 </head>
@@ -139,13 +178,9 @@
         <div class="info-section" style="margin-top: 20px;">
             <h3>This is the Test User Page</h3>
             <p style="color: #666; line-height: 1.6;">
-                You have successfully logged in! This is a basic test user page that displays after authentication. 
+                You have successfully logged in! This is a basic test user page that displays after authentication.
                 In a real application, this page would connect to your database and display user-specific information.
             </p>
-        </div>
-
-        <div class="footer">
-            <p>© 2024 DASAK Project - SIEM Dashboard</p>
         </div>
     </div>
 
