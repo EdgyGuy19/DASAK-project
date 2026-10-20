@@ -69,7 +69,6 @@ def dashboard_page():
 def check_admin(admin: User = Depends(require_admin)):
     return {"admin": True}
 
-
 @app.get("/api/admin/users", response_model=list[UserOut])
 def list_users(
     limit: int = Query(default=100, ge=1, le=100),
