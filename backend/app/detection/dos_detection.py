@@ -18,7 +18,9 @@ def check_dos_attack():
     with (
         closing(sqlite3.connect(DATABASE_FILE, timeout=10)) as connection,
         connection,
+
     ):
+        connection.row_factory = sqlite3.Row
         quory_event = connection.execute(f"""
             SELECT * FROM events
             WHERE event_type = 'http_request'
@@ -49,14 +51,14 @@ def check_dos_attack():
         matching_alerts = []
 
         for alert in existing_alerts:
-            if alert[0] == ip_src:
+            if alert["ip_src"] == ip_src:
                 matching_alerts.append(alert)
         if matching_alerts:
             continue
 
         log_alert(
             rule="DOS Attack",
-            username=ip_events[0][4],
+            username=ip_events[0]["username"],
             event_count=len(ip_events),
             status=True,
             message="Possible DOS attack detected",
@@ -90,5 +92,5 @@ async def run_dos_detection():
 def event_filter(events):
     groups_by_ip = defaultdict(list)
     for event in events:
-        groups_by_ip[event[5]].append(event)
+        groups_by_ip[event["ip_src"]].append(event)
     return groups_by_ip
