@@ -92,11 +92,13 @@ def user_page():
 def admin_page():
     return FileResponse(WEB_DIR / "admin.html")
 
+@app.get("/dashboard")
+def dashboard_page():
+    return FileResponse(WEB_DIR / "dashboard.html")
 
 @app.get("/api/admin/check")
 def check_admin(admin: User = Depends(require_admin)):
     return {"admin": True}
-
 
 @app.get("/api/admin/users", response_model=list[UserOut])
 def list_users(
