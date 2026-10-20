@@ -66,7 +66,7 @@ An admin only endpoint (`GET /api/stats`) shows total events, successful and fai
 
 ### Brute Force and Password Spraying Detection
 
-Two rules look at login events. One flags an account with 5 or more failed login attempts within 5 minutes. The other flags an IP address that tries 5 or more different accounts within 10 minutes. Detected attacks are saved as alerts, and a duplicate check stops an ongoing attack from creating repeated alerts.
+Two rules look at login events. One flags an account with 5 or more failed login attempts within 5 minutes. The other flags an IP address that tries 5 or more different accounts within 10 minutes. Detected attacks are saved as alerts, and a duplicate check stops an ongoing attack from creating repeated alerts. Both rules run automatically in the background every 60 seconds through a FastAPI background task, so no manual step is needed to detect an ongoing attack.
 
 ### SIEM API
 
