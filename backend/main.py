@@ -27,7 +27,11 @@ async def lifespan(app: FastAPI):
         yield
     finally:
         task.cancel()
-        await task
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+
 
 app = FastAPI(lifespan=lifespan)
 app.middleware("http")(log_sql_injection_request)
