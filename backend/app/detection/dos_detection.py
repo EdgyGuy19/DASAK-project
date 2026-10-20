@@ -2,7 +2,6 @@ import sqlite3
 import asyncio
 from collections import defaultdict
 from contextlib import closing
-from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from fastapi import Request
 from starlette.concurrency import run_in_threadpool
@@ -20,15 +19,23 @@ def check_dos_attack():
         closing(sqlite3.connect(DATABASE_FILE, timeout=10)) as connection,
         connection,
     ):
-        result = connection.execute(f"""
+        quory_event = connection.execute(f"""
             SELECT * FROM events
             WHERE event_type = 'http_request'
               AND julianday(timestamp)
                   BETWEEN julianday('now', '-{WINDOW_SECONDS} seconds')
                       AND julianday('now')
         """)
-        events = result.fetchall()
-        existing_alerts = get_existing(connection)
+        quory_alert = connection.execute(f"""
+            SELECT ip_src, timestamp FROM alerts
+            WHERE status = TRUE
+              AND rule = 'DOS Attack'
+              AND julianday(timestamp)
+                  BETWEEN julianday('now', '-{ALERT_COOLDOWN_SECONDS} seconds')
+                      AND julianday('now')
+        """)
+        events = quory_event.fetchall()
+        existing_alerts = quory_alert.fetchall()
 
     if not events:
         return
@@ -44,7 +51,7 @@ def check_dos_attack():
         for alert in existing_alerts:
             if alert[0] == ip_src:
                 matching_alerts.append(alert)
-        if check_timestamp(matching_alerts):
+        if matching_alerts:
             continue
 
         log_alert(
@@ -52,7 +59,7 @@ def check_dos_attack():
             username=ip_events[0][4],
             event_count=len(ip_events),
             status=True,
-            message="DOS attack detected",
+            message="Possible DOS attack detected",
             ip_src=ip_src
         )
 
@@ -85,24 +92,3 @@ def event_filter(events):
     for event in events:
         groups_by_ip[event[5]].append(event)
     return groups_by_ip
-
-def get_existing(connection):
-    opened_alerts = connection.execute("SELECT ip_src, timestamp FROM alerts WHERE status = TRUE AND rule = 'DOS Attack'")
-    alerts = opened_alerts.fetchall()
-    return alerts
-
-def check_timestamp(alerts):
-    if not alerts:
-        return False
-
-    timestamp_cutoff = datetime.now(UTC) - timedelta(seconds=ALERT_COOLDOWN_SECONDS)
-
-    latest_timestamp = max(
-        datetime.fromisoformat(alert[1])
-        for alert in alerts
-    )
-
-    if latest_timestamp > timestamp_cutoff:
-        return True
-    else:
-        return False
