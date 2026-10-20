@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from ..models import Alert
 from ..models import Event
 
 FAILED_THRESHOLD = 5
@@ -82,3 +83,26 @@ def detect_password_spraying(db: Session, now: datetime | None = None) -> list[d
 
 def run_all(db: Session, now: datetime | None = None) -> list[dict]:
     return detect_brute_force(db, now) + detect_password_spraying(db, now)
+
+
+def persist_alerts(db: Session, findings: list[dict]) -> None:
+    """Saves findings as open alerts, skipping duplicates still open."""
+    for f in findings:
+        existing = db.scalar(
+            select(Alert).where(
+                Alert.rule == f["rule"],
+                Alert.username == f["username"],
+                Alert.status == True,  # noqa: E712
+            )
+        )
+        if existing:
+            continue
+        db.add(Alert(
+            rule=f["rule"],
+            username=f["username"],
+            ip_src=f["src_ip"],
+            event_count=f["event_count"],
+            status=True,
+            message=f["message"],
+        ))
+    db.commit()
