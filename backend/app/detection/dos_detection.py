@@ -43,7 +43,7 @@ def check_dos_attack():
             username=ip_events[0][4],
             event_count=len(ip_events),
             status=True,
-            message="DOS attack detected",
+            message="Possible DOS attack detected",
             ip_src=ip_src
         )
 
@@ -65,7 +65,7 @@ async def log_dos_request(request: Request, call_next):
 def event_filter(events):
     current_timestamp = datetime.now(UTC)
     groups_by_ip = defaultdict(list)
-    timestamp_cutoff = current_timestamp - timedelta(seconds=10)
+    timestamp_cutoff = current_timestamp - timedelta(seconds=20)
     for event in events:
         timestamp = datetime.fromisoformat(event[1])
         if timestamp >= timestamp_cutoff:
