@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
-
+from profile import run
+import asyncio
 from fastapi import FastAPI, Depends, HTTPException, Query, status
 from fastapi.responses import FileResponse
 from sqlalchemy import select
@@ -12,7 +13,7 @@ from app.schemas import UserOut, EventOut
 from app.stats import router as stats_router
 from app.siem import router as siem_router
 from app.detection.request_logging import log_sql_injection_request
-from app.detection.dos_detection import log_dos_request
+from app.detection.dos_detection import log_dos_request, run_dos_detection
 
 from pathlib import Path
 
@@ -21,8 +22,12 @@ WEB_DIR = Path(__file__).resolve().parents[1] / "web"
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
-    yield
-
+    task = asyncio.create_task(run_dos_detection())
+    try:
+        yield
+    finally:
+        task.cancel()
+        await task
 
 app = FastAPI(lifespan=lifespan)
 app.middleware("http")(log_sql_injection_request)
