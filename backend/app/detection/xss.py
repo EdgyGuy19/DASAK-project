@@ -17,7 +17,7 @@ XSS_PATTERNS = [
     r"<span[^>]*onmouseover\s*=\s*['\"]javascript:.*?['\"][^>]*>",
     r"<p[^>]*onmouseout\s*=\s*['\"]javascript:.*?['\"][^>)*]",
     r"<h1[^>]*onfocus\s*=\\'\"javascript:.*?\\'\"[^\"]*>",
-    r"<h2[^]*",
+    r"<h2[^]*>",
 ]
 
 def detect_xss(input_text: str) -> bool:
