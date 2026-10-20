@@ -44,7 +44,7 @@ python -m pytest backend/tests/test_sql_injection.py -v
 The SQL injection detection is implemented with regex to identify basic attack patterns such as OR 1=1 and UNION SELECT. The detection is integrated into FastAPI through middleware that controls the query parameters and user input. If there is suspicious input, it will be registered as an event and an alert in the database. This only logs detections, there is no prevention of the attacks.
 
 ### DOS Detection
-The Dos detection is implemented with the help of event logging functionality and FastAPI middleware which helps register an extra event in the event table of our database. That extra event is called "http_request" which registers every http request made to the server(even if security event was not logged). If there are more than 30 requests in the span of 20 seconds than an alert will be raised by creating one in the alert database. Duplicate alerts are stopped from being created by checking if the last existing DOS alert for that ip is older than 2 minutes. If not then a new alert is not created.
+The Dos detection is implemented with the help of event logging functionality and FastAPI middleware which helps register an extra event in the event table of our database. That extra event is called "http_request" which registers every http request made to the server(even if security event was not logged). If there are more than 100 requests in the span of 20 seconds than an alert will be raised by creating one in the alert database. Duplicate alerts are stopped from being created by checking if the last existing DOS alert for that ip is older than 2 minutes. If not then a new alert is not created.
 
 ### FastAPI
 
