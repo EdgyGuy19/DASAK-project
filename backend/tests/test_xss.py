@@ -14,7 +14,7 @@ from app.models import Alert, Event, User
     "<img src=1 href=1 onerror=\"javascript:alert(1)\">",
     "<svg/onload=alert(1)>",
     "<body onload=alert(1)>",
-    "<iframe onload=alert(1)></iframe>"
+    "<iframe onload=alert(1)></iframe>",
     "<input type=\"text\" onfocus=\"alert(1)\" autofocus>",
     "<input onblur=alert(1) autofocus><input autofocus>",
     "<select onchange=alert(1)><option>1</option><option>2</option></select>",
@@ -32,7 +32,7 @@ from app.models import Alert, Event, User
     "<script>alert(\"XSS\")</script>",
     "<script>alert(document.cookie)</script>",
     "<script>alert(window.location)</script>",
-    "<SCRIPT>alert(1)</SCRIPT>"
+    "<SCRIPT>alert(1)</SCRIPT>",
     "<ScRiPt>alert(1)</sCrIpT>",
     "<script>confirm(1)</script>",
     "<script>prompt(1)</script>",
@@ -43,7 +43,7 @@ from app.models import Alert, Event, User
     "<script>/* */alert(1)//</script>",
     "<script>",
     "alert(1)",
-    "</script>"
+    "</script>",
 ])
 def test_detects_common_signatures(payload):
     assert detect_xss(payload)
