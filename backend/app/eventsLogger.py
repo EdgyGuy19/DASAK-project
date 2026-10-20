@@ -21,7 +21,6 @@ EVENT_TYPES = frozenset({
 
 DATABASE_FILE = Path(__file__).resolve().parents[2] / "dasak.db"
 
-
 def log_event(
     event_type: str,
     status_code: int,
