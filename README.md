@@ -43,6 +43,10 @@ python -m pytest backend/tests/test_sql_injection.py -v
 
 The SQL injection detection is implemented with regex to identify basic attack patterns such as OR 1=1 and UNION SELECT. The detection is integrated into FastAPI through middleware that controls the query parameters and user input. If there is suspicious input, it will be registered as an event and an alert in the database. This only logs detections, there is no prevention of the attacks.
 
+### XSS Detection
+
+The XSS detection is also implemented using regex to identify potential attacks. Such as for example, a user putting suspicous input into in the login field. 
+
 ### DOS Detection
 The Dos detection is implemented with the help of event logging functionality and FastAPI middleware which helps register an extra event in the event table of our database. That extra event is called "http_request" which registers every http request made to the server(even if security event was not logged). If there are more than 100 requests in the span of 20 seconds than an alert will be raised by creating one in the alert database. Duplicate alerts are stopped from being created by checking if the last existing DOS alert for that ip is older than 2 minutes. If not then a new alert is not created.
 
@@ -71,6 +75,10 @@ Two rules look at login events. One flags an account with 5 or more failed login
 ### SIEM API
 
 REST API endpoints were implemented to get security events and alerts from the database. It supports event filtering by event_type, username, ip_src, status_code and alert filtering by rule, status, username, ip_src. It is also possible to get individual events and alerts and update the alert status. The API requires admin authorization.
+
+### Dashboard
+
+Using the endpoints from the SIEM api and SIEM statistics a count of total amount of alerts and events, aswell as the logs for the events and alerts. 
 
 ### Event logger and alert creation
 Both are implemented in a simillair way where a function exists that can be called to create a certain event or alert and pasted into the database. Events are logged during requests to the website or server and alerts are created when certain rules are triggered.
@@ -101,6 +109,10 @@ Several tries were made to simulate DoS attacks, like different number of reques
 
 These simulations worked as expected according to the implemented rule and created the expected alerts in the database and ignored normal traffic.
 
+### AI usage
+
+Github copilot was used to solve two merge conflicts at the end of the project. The built in github copilot merge conflict solver was used, so no promtp was provided.
+
 ## Personal contributions
 
 * Edgar: 
@@ -113,6 +125,7 @@ Created and designed the databases.
 Auth backend (registration, login, JWT) and frontend connection for login, registration and session checking. SIEM statistics. Brute force and password spraying detection with tests and attack simulation.
 
 * Samuel:
+Created parts of the database and connected it to the front end. Made the XSS detection and dashboard as well. 
 
 * Victoria:
 Implemented the SQL injection detection and automated tests. Connected frontend and backend with FastAPI and created the admin page and its logic. Implemented the SIEM API for security events and alerts.
