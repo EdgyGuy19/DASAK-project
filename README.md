@@ -43,6 +43,9 @@ python -m pytest backend/tests/test_sql_injection.py -v
 
 The SQL injection detection is implemented with regex to identify basic attack patterns such as OR 1=1 and UNION SELECT. The detection is integrated into FastAPI through middleware that controls the query parameters and user input. If there is suspicious input, it will be registered as an event and an alert in the database. This only logs detections, there is no prevention of the attacks.
 
+### DOS Detection
+The Dos detection is implemented with the help of event logging functionality and FastAPI middleware which helps register an extra event in the event table of our database. That extra event is called "http_request" which registers every http request made to the server(even if security event was not logged). If there are more than 30 requests in the span of 20 seconds than an alert will be raised by creating one in the alert database. Duplicate alerts are stopped from being created by checking if the last existing DOS alert for that ip is older than 2 minutes. If not then a new alert is not created.
+
 ### FastAPI
 
 FastAPI is used to connect frontend and backend with API endpoints.
@@ -69,6 +72,9 @@ Two rules look at login events. One flags an account with 5 or more failed login
 
 REST API endpoints were implemented to get security events and alerts from the database. It supports event filtering by event_type, username, ip_src, status_code and alert filtering by rule, status, username, ip_src. It is also possible to get individual events and alerts and update the alert status. The API requires admin authorization.
 
+### Event logger and alert creation
+Both are implemented in a simillair way where a function exists that can be called to create a certain event or alert and pasted into the database. Events are logged during requests to the website or server and alerts are created when certain rules are triggered.
+
 ## Documentation On Testing The Project
 ### SQL Injection Detection
 Automated testing is implemented with Pytest and FastAPI TestClient to check the SQL injection detection.
@@ -88,11 +94,18 @@ A separate script (`tests/simulate_brute_force.py`) sends real HTTP requests to 
 
 The simulated attack correctly produced an alert, and normal traffic produced no false alarm.
 
+### DoS Simulation
+DoS detection is tested using the custom script [simulate_dos_attack.py](backend/tests/simulate_dos_attack.py), which sends repeated HTTP requests to an application endpoint. The event logger records these requests. If too many requests originate from the same IP address, an alert is created in the database with the status `open`.
+
+Several tries were made to simulate DoS attacks, like different number of requests from the same IP address. Also normal amount of traffic was simulated to verify that the rule does not trigger below the threshold. Both by the script and by the user.
+
+These simulations worked as expected according to the implemented rule and created the expected alerts in the database and ignored normal traffic.
 
 ## Personal contributions
 
 * Edgar: 
 Project architecture, planning and leading.
+Basic HTML design and starter pages.
 Event logger, alert creation, dos detection rule.
 Created and designed the databases.
 
