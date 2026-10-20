@@ -56,6 +56,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.middleware("http")(log_sql_injection_request)
 app.middleware("http")(log_xss_attempt_request)
+app.middleware("http")(log_dos_request)
 
 app.include_router(auth_router)
 
