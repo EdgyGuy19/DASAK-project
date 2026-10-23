@@ -12,9 +12,10 @@
         body {
             margin: 0;
             padding: 24px;
+            min-height: 100vh;
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
+            background: #11151b;
+            color: #e6edf3;
         }
 
         .dashboard {
@@ -25,9 +26,9 @@
         .header,
         .card,
         .panel {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background: #1b222c;
+            border: 1px solid #343f4d;
+            border-radius: 6px;
         }
 
         .header {
@@ -54,16 +55,16 @@
 
         button {
             padding: 10px 16px;
-            border: 0;
-            border-radius: 5px;
-            background: #667eea;
-            color: white;
-            font-weight: bold;
+            border: 1px solid #5f6d80;
+            border-radius: 4px;
+            background: #1b222c;
+            color: inherit;
+            font-weight: normal;
             cursor: pointer;
         }
 
         button:hover {
-            background: #5568d8;
+            background: #283341;
         }
 
         .counters {
@@ -81,7 +82,7 @@
         .counter {
             display: block;
             margin-bottom: 8px;
-            color: #667eea;
+            color: #9cc9ff;
             font-size: 36px;
         }
 
@@ -91,7 +92,7 @@
         }
 
         .status {
-            color: #666;
+            color: #adb9c7;
         }
 
         .error {
@@ -116,7 +117,7 @@
         }
 
         th {
-            background: #f8f9fa;
+            background: #11151b;
         }
 
         @media (max-width: 700px) {
