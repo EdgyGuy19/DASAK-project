@@ -41,7 +41,11 @@ python -m pytest backend/tests/test_sql_injection.py -v
 
 ### SQL Injection Detection
 
-The SQL injection detection is implemented with regex to identify basic attack patterns such as OR 1=1 and UNION SELECT. The detection is integrated into FastAPI through middleware that controls the query parameters and user input. If there is suspicious input, it will be registered as an event and an alert in the database. This only logs detections, there is no prevention of the attacks.
+SQL injection detection is implemented using regular expressions (regex) to identify common attack patterns, such as OR 1=1 and UNION SELECT. Basic input normalization is also applied to detect patterns that use SQL comments or variations in capitalization and spacing.
+
+The detection is integrated into FastAPI through middleware that inspects URL query parameters and login and registration inputs.
+
+When suspicious input is detected, both a security event and an alert are stored in the database. The event records the activity, while the alert flags it as potentially malicious. The detection is designed for monitoring only. It logs suspicious requests but does not block them.
 
 ### XSS Detection
 
@@ -52,11 +56,17 @@ The Dos detection is implemented with the help of event logging functionality an
 
 ### FastAPI
 
-FastAPI is used to connect frontend and backend with API endpoints.
+FastAPI is used to connect the frontend and backend through REST API endpoints. The frontend handles user interactions, while the backend manages authentication, authorization, and database operations.
+
+For example, during login, the frontend sends a request to FastAPI, which validates the user's credentials and returns a response.
 
 ### Admin page
 
-The admin page is created so that admins can see all registered users, their emails and what roles they have. The authorization is checked with FastAPI. Without admin authorization, the user will be redirected from the admin page.
+The admin page allows authorized administrators to view registered users, including their email addresses and assigned roles.
+
+Authentication is handled using JSON Web Tokens (JWT). After login, users receive a signed token that identifies them. When accessing protected admin endpoints, FastAPI verifies the token and checks whether the user has admin permissions.
+
+Users without the required permissions cannot access protected admin data and are redirected away from the admin page.
 
 ### Authentication
 
@@ -74,7 +84,15 @@ Two rules look at login events. One flags an account with 5 or more failed login
 
 ### SIEM API
 
-REST API endpoints were implemented to get security events and alerts from the database. It supports event filtering by event_type, username, ip_src, status_code and alert filtering by rule, status, username, ip_src. It is also possible to get individual events and alerts and update the alert status. The API requires admin authorization.
+REST API endpoints are implemented to retrieve and manage security events and alerts stored in the database.
+
+The API supports 
+- Filtering events by event_type, username, ip_src, and status_code.
+- Filtering alerts by rule, status, username, and ip_src.
+- Retrieving individual events and alerts.
+- Updating alert statuses using a PATCH endpoint.
+
+All endpoints require admin authorization.
 
 ### Dashboard
 
@@ -83,16 +101,20 @@ Using the endpoints from the SIEM api and SIEM statistics a count of total amoun
 ### Event logger and alert creation
 Both are implemented in a simillair way where a function exists that can be called to create a certain event or alert and pasted into the database. Events are logged during requests to the website or server and alerts are created when certain rules are triggered.
 
+### Limitations
+For SQL injection detection, the detection relies on predefined regex patterns, which means advanced SQL injection attempts may go undetected. False positives may also occur. Therefore, the implementation serves as an additional security monitoring mechanism rather than a complete solution for preventing SQL injection.
+
 ## Documentation On Testing The Project
 ### SQL Injection Detection
-Automated testing is implemented with Pytest and FastAPI TestClient to check the SQL injection detection.
 
-It tests:
-- Identifying common SQL injection patterns.
-- If normal user input can be falsely identified as SQL injection (false positive).
-- Detection of SQL injection in HTTP requests.
-- Checks that the detection doesn't block normal HTTP requests.
-- Checks that detections are registered as events and alerts in the database.
+Automated tests are implemented using Pytest and FastAPI TestClient to verify the SQL injection detection functionality.
+
+The tests cover:
+- Detection of common SQL injection patterns.
+- False positives, where harmless input is incorrectly identified as suspicious.
+- Detection of SQL injection attempts in HTTP requests.
+- Verification that detection does not block requests or change their expected responses.
+- Verification that detected attempts are stored as security events and alerts in the database.
 
 ### Authentication and Login Detection
 
