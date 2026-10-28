@@ -49,7 +49,7 @@ When suspicious input is detected, both a security event and an alert are stored
 
 ### XSS Detection
 
-The XSS detection is also implemented using regex to identify potential attacks. Such as for example, a user putting suspicous input into in the login field. 
+The XSS detection is also implemented using regex to identify potential attacks. Every POST request on the /login and /register page is matched against known XSS patterns. If the contents of a request matches any of these patterns, an Alert is created and shown on the dashboard. 
 
 ### DOS Detection
 The Dos detection is implemented with the help of event logging functionality and FastAPI middleware which helps register an extra event in the event table of our database. That extra event is called "http_request" which registers every http request made to the server(even if security event was not logged). If there are more than 100 requests in the span of 20 seconds than an alert will be raised by creating one in the alert database. Duplicate alerts are stopped from being created by checking if the last existing DOS alert for that ip is older than 2 minutes. If not then a new alert is not created.
@@ -66,7 +66,18 @@ The admin page allows authorized administrators to view registered users, includ
 
 Authentication is handled using JSON Web Tokens (JWT). After login, users receive a signed token that identifies them. When accessing protected admin endpoints, FastAPI verifies the token and checks whether the user has admin permissions.
 
-Users without the required permissions cannot access protected admin data and are redirected away from the admin page.
+Users without the required permissions cannot access protected admin data and are redirected away from the admin page. If a 
+
+To log in on a an account with admin privileges and gain access to the admin page, use the username admin3, and password adminroot. If that account was removed, or you need a new admin account, follow these instructions:
+
+1. Go to http://127.0.0.1:8000/register and follow the instructions on how to create a new account.
+2. From the project root, run:
+
+```powershell
+sqlite3 dasak.db \
+  "UPDATE users SET is_admin = 1 WHERE username = '"username"';"
+```
+Where "username" should be replaced with username of the account you want to give admin privileges. 
 
 ### Authentication
 
@@ -96,7 +107,7 @@ All endpoints require admin authorization.
 
 ### Dashboard
 
-Using the endpoints from the SIEM api and SIEM statistics a count of total amount of alerts and events, aswell as the logs for the events and alerts. 
+Using the endpoints from the SIEM api and SIEM statistics a count of total amount of alerts and events, aswell as the logs for the events and alerts. The dashboard can be reached on http://127.0.0.1:8000/Dashboard. You need admin privileges to reach the Dashboard. See the paragraph about the Admin Page if you need an account with admin privileges. 
 
 ### Event logger and alert creation
 Both are implemented in a simillair way where a function exists that can be called to create a certain event or alert and pasted into the database. Events are logged during requests to the website or server and alerts are created when certain rules are triggered.
@@ -115,6 +126,10 @@ The tests cover:
 - Detection of SQL injection attempts in HTTP requests.
 - Verification that detection does not block requests or change their expected responses.
 - Verification that detected attempts are stored as security events and alerts in the database.
+
+### XXS Detection
+
+The test is implemented using Pytest. The test is compromised of a payload containing strings either used in detecting the possiblity of an XSS attack, or strings used to perform an XXS attack.
 
 ### Authentication and Login Detection
 
