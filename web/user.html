@@ -155,7 +155,7 @@
 </head>
 <body>
     <div class="navbar">
-        <h1>Dashboard</h1>
+        <h1>User</h1>
         <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
 
@@ -163,7 +163,8 @@
         <div class="welcome-section">
             <h2>Welcome!</h2>
             <p>Hello, <span class="username-display" id="displayUsername">User</span></p>
-            <p><a id="adminLink" href="/admin" hidden>Open Admin</a></p>
+            <p><a id="adminLink" href="/admin" hidden>Open Admin Page</a></p>
+            <p><a id="dashboardLink" href="/dashboard" hidden>Open Dashboard Page</a></p>
         </div>
 
         <div class="info-section">
@@ -175,9 +176,6 @@
             </ul>
         </div>
 
-        <div class="info-section" style="margin-top: 20px;">
-            <h3>User Page</h3>
-        </div>
     </div>
 
     <script>
@@ -206,6 +204,7 @@
             const user = await res.json();
             document.getElementById('displayUsername').textContent = user.username;
             document.getElementById('adminLink').hidden = !user.is_admin;
+            document.getElementById('dashboardLink').hidden = !user.is_admin;
             document.getElementById('lastLogin').textContent = new Date().toLocaleString();
         } catch (err) {
             // Server unreachable: redirect to login
