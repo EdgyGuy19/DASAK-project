@@ -38,6 +38,28 @@ Run only specific tests, such as SQL injection:
 ```powershell
 python -m pytest backend/tests/test_sql_injection.py -v
 ```
+### Account creation and login
+
+To create and account, visit http://127.0.0.1:8000/register and follow the instructions. Visit  http://127.0.0.1:8000/login to log in to your newly created account.
+
+### Admin page
+
+The admin page allows authorized administrators to view registered users, including their email addresses and assigned roles.
+
+Authentication is handled using JSON Web Tokens (JWT). After login, users receive a signed token that identifies them. When accessing protected admin endpoints, FastAPI verifies the token and checks whether the user has admin permissions.
+
+Users without the required permissions cannot access protected admin data and are redirected away from the admin page.
+
+To log in on a an account with admin privileges and gain access to the admin page, use the username admin3, and password adminroot. If that account was removed, or you need a new admin account, follow these instructions:
+
+1. Go to http://127.0.0.1:8000/register and follow the instructions on how to create a new account.
+2. From the project root, run:
+
+```powershell
+sqlite3 dasak.db \
+  "UPDATE users SET is_admin = 1 WHERE username = '"username"';"
+```
+Where "username" should be replaced with username of the account you want to give admin privileges. 
 
 ### SQL Injection Detection
 
@@ -60,24 +82,6 @@ FastAPI is used to connect the frontend and backend through REST API endpoints. 
 
 For example, during login, the frontend sends a request to FastAPI, which validates the user's credentials and returns a response.
 
-### Admin page
-
-The admin page allows authorized administrators to view registered users, including their email addresses and assigned roles.
-
-Authentication is handled using JSON Web Tokens (JWT). After login, users receive a signed token that identifies them. When accessing protected admin endpoints, FastAPI verifies the token and checks whether the user has admin permissions.
-
-Users without the required permissions cannot access protected admin data and are redirected away from the admin page. If a 
-
-To log in on a an account with admin privileges and gain access to the admin page, use the username admin3, and password adminroot. If that account was removed, or you need a new admin account, follow these instructions:
-
-1. Go to http://127.0.0.1:8000/register and follow the instructions on how to create a new account.
-2. From the project root, run:
-
-```powershell
-sqlite3 dasak.db \
-  "UPDATE users SET is_admin = 1 WHERE username = '"username"';"
-```
-Where "username" should be replaced with username of the account you want to give admin privileges. 
 
 ### Authentication
 
@@ -130,6 +134,12 @@ The tests cover:
 ### XXS Detection
 
 The test is implemented using Pytest. The test is compromised of a payload containing strings either used in detecting the possiblity of an XSS attack, or strings used to perform an XXS attack.
+
+If it is desired to run the XSS detection seperate from the other tests, you can use the following command in the project root: 
+
+```powershell
+pytest backend/tests/test_xss.py      
+```
 
 ### Authentication and Login Detection
 
